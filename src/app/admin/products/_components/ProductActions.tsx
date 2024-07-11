@@ -3,6 +3,8 @@
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import React, { useTransition } from 'react'
 import { deleteProduct, toggleProductAvailability } from '../../_actions/Products'
+import { useRouter } from 'next/navigation'
+
 
 export const ActiveToggleDropDownItem = ({
     id,
@@ -13,42 +15,48 @@ export const ActiveToggleDropDownItem = ({
 }) => {
 
     const [isPending, startTransition] = useTransition()
+    const router = useRouter()
 
-  return (
-    <DropdownMenuItem 
-    disabled={isPending}
-    onClick={()=>{
-        startTransition(async ()=>{
-            await toggleProductAvailability(id, !isAvailableForPurchase)
-        })
-    }}>
-        {
-            isAvailableForPurchase ? "Deactivate" : "Activate"
-        }
-    </DropdownMenuItem>
-  )
+    return (
+        <DropdownMenuItem
+            disabled={isPending}
+            onClick={() => {
+                startTransition(async () => {
+                    await toggleProductAvailability(id, !isAvailableForPurchase)
+                    router.refresh()
+                })
+            }}>
+            {
+                isAvailableForPurchase ? "Deactivate" : "Activate"
+            }
+        </DropdownMenuItem>
+    )
 }
 
 export const DeleteDropDownItem = ({
     id,
     disabled
-}:{
+}: {
     id: string,
     disabled: boolean
-}) =>{
- const [isPending, startTransition] = useTransition()
+}) => {
+    const [isPending, startTransition] = useTransition()
 
-  return (
-    <DropdownMenuItem 
-    disabled={isPending || disabled}
-    onClick={()=>{
-        startTransition(async ()=>{
-            await deleteProduct(id)
-        })
-    }}>
-        Delete
-    </DropdownMenuItem>
-  )
+    const router = useRouter()
+
+    return (
+        <DropdownMenuItem
+            variant='destructive'
+            disabled={isPending || disabled}
+            onClick={() => {
+                startTransition(async () => {
+                    await deleteProduct(id)
+                    router.refresh()
+                })
+            }}>
+            Delete
+        </DropdownMenuItem>
+    )
 }
 
 // export {

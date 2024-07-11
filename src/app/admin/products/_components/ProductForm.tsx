@@ -8,20 +8,32 @@ import { Textarea } from '@/components/ui/textarea'
 import { formatCurrency } from '@/lib/formatters'
 import React, { useActionState, useState } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
-import { addProduct } from '../../_actions/Products'
+import { addProduct, updateProduct } from '../../_actions/Products'
+import { Product } from "@prisma/client"
+import Image from "next/image"
 
-const ProductForm = () => {
+const ProductForm = ({ product }: { product?: Product | null }) => {
 
-    const [error, action] = useFormState(addProduct, {})
+    console.log("PRODUCT:::", product)
 
-    const [priceInCents, setPriceInCents] = useState<number | undefined>(0)
+    const [error, action] = useFormState(
+        product == null ? addProduct : updateProduct.bind(null, product.id),
+        {}
+    )
+    const [priceInCents, setPriceInCents] = useState<number | undefined>(product?.priceInCents)
 
     return (
         <>
             <form action={action} className='space-y-8'>
                 <div className='space-y-2'>
                     <Label htmlFor='name'>Name</Label>
-                    <Input id='name' type='text' name='name' required />
+                    <Input
+                        id='name'
+                        type='text'
+                        name='name'
+                        required
+                        defaultValue={product?.name || ""}
+                    />
                     {
                         error?.name && <p className='text-red-500'>{error.name}</p>
                     }
@@ -49,7 +61,9 @@ const ProductForm = () => {
 
                 <div className='space-y-2'>
                     <Label htmlFor='description'>Description</Label>
-                    <Textarea id='description' name='description' required />
+                    <Textarea id='description' name='description' required
+                        defaultValue={product?.description || ""}
+                    />
                     {
                         error?.description && <p className='text-red-500'>{error.description}</p>
                     }
@@ -62,8 +76,14 @@ const ProductForm = () => {
                         type='file'
                         id='file'
                         name='file'
-                        required
+                        required={product == null}
                     />
+                    {
+                        product != null &&
+                        <div className='text-muted-foreground'>
+                            {product.filePath}
+                        </div>
+                    }
                     {
                         error?.file && <p className='text-red-500'>{error.file}</p>
                     }
@@ -75,8 +95,18 @@ const ProductForm = () => {
                         type='file'
                         id='image'
                         name='image'
-                        required
+                        required={product == null}
                     />
+                    {
+                        product != null && <>
+                            {/* <Image
+                                src={product.imagePath}
+                                height={400}
+                                width={400}
+                                alt='product image'
+                            /> */}
+                        </>
+                    }
                     {
                         error?.image && <p className='text-red-500'>{error.image}</p>
                     }
